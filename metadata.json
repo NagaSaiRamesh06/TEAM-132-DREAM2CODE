@@ -1,0 +1,7 @@
+{
+  "name": "Career Vibe AI",
+  "description": "A comprehensive, AI-powered placement preparation assistant for students and graduates.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
