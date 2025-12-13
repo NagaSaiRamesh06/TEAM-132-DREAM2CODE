@@ -9,20 +9,43 @@ const ai = new GoogleGenAI({ apiKey });
 export const generateResumeContent = async (profile: UserProfile, language: string) => {
   const model = "gemini-2.5-flash";
   const prompt = `
-    Create a professional, ATS-friendly resume in Markdown format for the following profile.
-    Language: ${language}.
-    Profile Data: ${JSON.stringify(profile)}
+    You are an expert Resume Writer. Create a high-quality, ATS-Optimized professional resume for the following profile.
     
-    Structure it with clear headers: # Name, ## Summary, ## Skills, ## Experience, ## Projects, ## Education.
-    Use strong action verbs. Highlight achievements.
+    CRITICAL CONSTRAINT: SINGLE PAGE ONLY.
+    - Be extremely concise. 
+    - Limit bullet points to the top 3-4 most impactful achievements per role.
+    - Keep the Summary to maximum 3 lines.
+    - Group Skills efficiently (comma-separated lines rather than vertical lists) to save space.
+
+    CRITICAL FORMATTING INSTRUCTIONS:
+    1. Output strictly in Markdown.
+    2. Do NOT use code blocks or fences (no \`\`\`).
+    3. Structure:
+       - # Name (H1)
+       - Contact Info (Phone | Email | LinkedIn | Location) on the line immediately below name.
+       - ## SUMMARY
+       - ## SKILLS
+       - ## EXPERIENCE (Reverse chronological. Format: **Role** | **Company** | Date)
+       - ## PROJECTS
+       - ## EDUCATION
+    
+    4. Content Style:
+       - Use strong action verbs (Spearheaded, Developed, Optimized).
+       - Quantify achievements (e.g., "improved performance by 20%").
+       - No tables, no columns (Single column is best for ATS).
+       - Language: ${language}.
+    
+    Profile Data: ${JSON.stringify(profile)}
   `;
 
   try {
     const response = await ai.models.generateContent({
       model,
-      contents: prompt,
+      contents: {
+        parts: [{ text: prompt }]
+      },
       config: {
-        temperature: 0.4, // Slight creativity allowed for writing
+        temperature: 0.3, // Low temperature for professional, consistent formatting
       }
     });
     return response.text;

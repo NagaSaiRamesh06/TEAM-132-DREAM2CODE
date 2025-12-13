@@ -16,6 +16,7 @@ export const ResumeBuilder: React.FC = () => {
   const [importText, setImportText] = useState('');
   const [importFile, setImportFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const resumeRef = useRef<HTMLDivElement>(null);
 
   const handleGenerate = async () => {
     setLoading(true);
@@ -77,11 +78,9 @@ export const ResumeBuilder: React.FC = () => {
 
           const extractedData = await parseResumeProfile(input);
           
-          // Merge logic: Overwrite fields if they exist in extracted data
           setProfile(prev => ({
               ...prev,
               ...extractedData,
-              // Ensure arrays are arrays
               education: extractedData.education || [],
               experience: extractedData.experience || [],
               skills: extractedData.skills || [],
@@ -124,22 +123,61 @@ export const ResumeBuilder: React.FC = () => {
     window.print();
   };
 
-  const downloadMarkdown = () => {
-    if (!generatedResume) return;
-    const element = document.createElement("a");
-    const file = new Blob([generatedResume], {type: 'text/markdown'});
-    element.href = URL.createObjectURL(file);
-    element.download = `${profile.name.replace(/\s+/g, '_')}_Resume.md`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+  // Improved Download Function for Word compatibility with Compact Styling
+  const downloadAsWord = () => {
+    if (!resumeRef.current) return;
+    
+    // Minimal HTML wrapper with strict compact CSS for Word
+    const preHtml = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <meta charset="utf-8">
+        <title>${profile.name || 'Resume'}</title>
+        <style>
+          body { font-family: 'Arial', sans-serif; font-size: 10.5pt; line-height: 1.2; color: #000; }
+          h1 { font-size: 20pt; font-weight: bold; text-transform: uppercase; text-align: center; margin-bottom: 4px; padding-bottom: 6px; border-bottom: 2px solid #000; }
+          h2 { font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #666; padding-bottom: 2px; margin-top: 10px; margin-bottom: 6px; }
+          h3 { font-size: 11pt; font-weight: bold; margin-bottom: 2px; margin-top: 2px; }
+          p { margin-bottom: 2px; margin-top: 0; text-align: justify; }
+          ul { margin-top: 2px; margin-bottom: 6px; padding-left: 18px; }
+          li { margin-bottom: 1px; }
+        </style>
+      </head><body>
+    `;
+    const postHtml = "</body></html>";
+    
+    const htmlContent = resumeRef.current.innerHTML;
+    const completeHtml = preHtml + htmlContent + postHtml;
+    
+    const blob = new Blob(['\ufeff', completeHtml], {
+      type: 'application/msword'
+    });
+    
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${profile.name ? profile.name.replace(/\s+/g, '_') : 'Resume'}.doc`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Ultra-Compact Custom Markdown Components for Professional Single-Page Look
+  const ResumeComponents = {
+    h1: ({node, ...props}: any) => <h1 className="text-2xl font-bold text-center uppercase mb-1 text-slate-900 border-b-2 border-slate-900 pb-2 tracking-wide" {...props} />,
+    h2: ({node, ...props}: any) => <h2 className="text-lg font-bold uppercase border-b border-slate-400 mt-3 mb-2 pb-0.5 text-slate-800 tracking-wider" {...props} />,
+    h3: ({node, ...props}: any) => <h3 className="text-base font-bold text-slate-800 mt-1.5 mb-0.5" {...props} />,
+    p: ({node, ...props}: any) => <p className="text-sm leading-snug mb-1 text-slate-700 text-justify" {...props} />,
+    ul: ({node, ...props}: any) => <ul className="list-disc ml-4 text-sm space-y-0.5 mb-2 text-slate-700" {...props} />,
+    li: ({node, ...props}: any) => <li className="pl-1 leading-snug" {...props} />,
+    strong: ({node, ...props}: any) => <span className="font-bold text-slate-900" {...props} />,
   };
 
   return (
-    <div className="max-w-5xl mx-auto h-[calc(100vh-100px)] flex flex-col md:flex-row gap-6">
+    <div className="max-w-6xl mx-auto h-[calc(100vh-100px)] flex flex-col md:flex-row gap-6">
       
       {/* Left: Editor */}
-      <div className="w-full md:w-1/2 flex flex-col h-full bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden no-print">
+      <div className="w-full md:w-5/12 flex flex-col h-full bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden no-print">
         <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex gap-2 overflow-x-auto no-scrollbar">
             {['reference', 'basic', 'education', 'experience', 'projects', 'preview'].map(tab => (
                 <button
@@ -151,7 +189,7 @@ export const ResumeBuilder: React.FC = () => {
                         : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
                     }`}
                 >
-                    {tab === 'reference' ? 'Import / Ref' : tab}
+                    {tab === 'reference' ? 'Import' : tab}
                 </button>
             ))}
         </div>
@@ -417,8 +455,8 @@ export const ResumeBuilder: React.FC = () => {
                             </button>
                         </div>
                     ) : (
-                        <div className="text-green-500 font-medium bg-green-50 dark:bg-green-900/20 px-4 py-2 rounded-lg">
-                            Resume generated successfully! See preview on the right.
+                        <div className="text-green-600 font-medium bg-green-50 dark:bg-green-900/20 px-4 py-2 rounded-lg">
+                            Resume ready! See preview on the right.
                         </div>
                     )}
                  </div>
@@ -432,42 +470,58 @@ export const ResumeBuilder: React.FC = () => {
                 className="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition-all"
             >
                 {loading ? <Loader2 className="animate-spin" /> : <Sparkles size={20} />}
-                Generate New Resume
+                Generate Professional Resume
             </button>
         </div>
       </div>
 
-      {/* Right: Preview (Note: print-container class is critical for CSS print media query) */}
-      <div className={`w-full md:w-1/2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col relative print-container`}>
-         <div className="absolute top-4 right-4 z-10 no-print flex gap-2">
-            <button 
-                onClick={downloadMarkdown} 
+      {/* Right: WYSIWYG Preview */}
+      <div className={`w-full md:w-7/12 flex flex-col bg-slate-200 dark:bg-slate-900 overflow-hidden relative print-container`}>
+         
+         <div className="bg-white dark:bg-slate-800 p-2 border-b border-slate-200 dark:border-slate-700 flex justify-end gap-2 no-print shadow-sm z-10">
+             <button 
+                onClick={downloadAsWord} 
                 disabled={!generatedResume} 
-                className="p-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-50"
-                title="Download Source (Markdown)"
+                className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                title="Download as Word Document"
             >
-                <FileDown size={20} />
+                <FileDown size={18} /> Word / Docs
             </button>
             <button 
                 onClick={printResume} 
                 disabled={!generatedResume} 
-                className="p-2 bg-brand-600 text-white rounded-lg shadow hover:bg-brand-700 disabled:opacity-50"
+                className="flex items-center gap-2 px-3 py-2 bg-slate-700 text-white text-sm font-medium rounded-lg hover:bg-slate-800 disabled:opacity-50 transition-colors"
                 title="Save as PDF / Print"
             >
-                <Printer size={20} />
+                <Printer size={18} /> PDF / Print
             </button>
          </div>
          
-         {/* Printable Area */}
-         <div className="flex-1 overflow-y-auto p-8 prose dark:prose-invert max-w-none">
-            {generatedResume ? (
-                <ReactMarkdown>{generatedResume}</ReactMarkdown>
-            ) : (
-                <div className="h-full flex flex-col items-center justify-center text-slate-400">
-                    <FileText size={48} className="mb-4 opacity-50"/>
-                    <p>Resume preview will appear here</p>
-                </div>
-            )}
+         {/* A4 Paper Container - Compact Mode */}
+         <div className="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center bg-slate-100 dark:bg-slate-900/50">
+            <div 
+                className="bg-white shadow-xl text-slate-900 print:shadow-none print:w-full print:m-0"
+                style={{ 
+                    width: '210mm', 
+                    minHeight: '297mm', 
+                    padding: '15mm', // Reduced padding for single-page fit
+                    boxSizing: 'border-box'
+                }}
+            >
+                {generatedResume ? (
+                    <div ref={resumeRef} className="resume-content">
+                        <ReactMarkdown components={ResumeComponents}>
+                            {generatedResume}
+                        </ReactMarkdown>
+                    </div>
+                ) : (
+                    <div className="h-full flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl p-10">
+                        <FileText size={48} className="mb-4 opacity-30"/>
+                        <p>Your resume preview will appear here.</p>
+                        <p className="text-sm mt-2">Click "Generate Professional Resume" to start.</p>
+                    </div>
+                )}
+            </div>
          </div>
       </div>
 
