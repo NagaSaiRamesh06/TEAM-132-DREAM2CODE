@@ -10,7 +10,8 @@ export const MOCK_JOBS: Job[] = [
     salary: '₹8L - ₹12L',
     posted: '2 days ago',
     skillsRequired: ['React', 'TypeScript', 'Tailwind', 'Redux'],
-    description: 'We are looking for a passionate Frontend Engineer to build modern web applications using React and TypeScript.'
+    description: 'We are looking for a passionate Frontend Engineer to build modern web applications using React and TypeScript. You will be responsible for developing new features, optimizing performance, and collaborating with the design team to deliver intuitive user interfaces.',
+    applyLink: 'https://www.linkedin.com/jobs/search/?keywords=Frontend%20Engineer'
   },
   {
     id: '2',
@@ -21,7 +22,8 @@ export const MOCK_JOBS: Job[] = [
     salary: '₹5L - ₹8L',
     posted: '1 day ago',
     skillsRequired: ['Python', 'SQL', 'Excel', 'Tableau'],
-    description: 'Analyze large datasets to extract meaningful insights. Proficiency in Python and SQL is mandatory.'
+    description: 'Analyze large datasets to extract meaningful insights. Proficiency in Python and SQL is mandatory. You will generate reports, visualize data trends, and assist stakeholders in making data-driven decisions.',
+    applyLink: 'https://www.linkedin.com/jobs/search/?keywords=Data%20Analyst'
   },
   {
     id: '3',
@@ -32,7 +34,8 @@ export const MOCK_JOBS: Job[] = [
     salary: '₹10L - ₹15L',
     posted: '3 days ago',
     skillsRequired: ['Node.js', 'MongoDB', 'AWS', 'Express'],
-    description: 'Build scalable APIs and microservices. Experience with AWS and NoSQL databases is a plus.'
+    description: 'Build scalable APIs and microservices. Experience with AWS and NoSQL databases is a plus. You will design database schemas, ensure system security, and deploy applications to cloud infrastructure.',
+    applyLink: 'https://www.linkedin.com/jobs/search/?keywords=Backend%20Developer'
   },
   {
     id: '4',
@@ -43,7 +46,8 @@ export const MOCK_JOBS: Job[] = [
     salary: '₹15k/month',
     posted: 'Just now',
     skillsRequired: ['Figma', 'UI/UX', 'Prototyping'],
-    description: 'Assist in designing user interfaces for mobile and web apps. Must have a strong portfolio.'
+    description: 'Assist in designing user interfaces for mobile and web apps. Must have a strong portfolio. You will create wireframes, prototypes, and high-fidelity mockups under the mentorship of senior designers.',
+    applyLink: 'https://www.linkedin.com/jobs/search/?keywords=Product%20Design'
   }
 ];
 

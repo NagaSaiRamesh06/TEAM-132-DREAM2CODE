@@ -1,10 +1,11 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Briefcase, FileText, UserCheck, MessageSquare, 
-  TrendingUp, Settings, Menu, X, Moon, Sun, Type 
+  TrendingUp, Settings, Menu, X, Moon, Sun, Type, LogOut 
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 
 const SidebarItem = ({ to, icon: Icon, label, active, onClick }: any) => (
   <Link 
@@ -23,8 +24,15 @@ const SidebarItem = ({ to, icon: Icon, label, active, onClick }: any) => (
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { theme, toggleTheme, dyslexicMode, toggleDyslexicMode } = useApp();
+  const { logout, user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const navItems = [
     { to: '/', icon: TrendingUp, label: 'Dashboard' },
@@ -60,8 +68,16 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             <X size={24} />
           </button>
         </div>
+        
+        {user && (
+          <div className="px-6 pb-2">
+            <div className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-2">Logged in as</div>
+            <div className="font-medium text-slate-900 dark:text-white truncate">{user.name}</div>
+            <div className="text-sm text-slate-500 truncate">{user.email}</div>
+          </div>
+        )}
 
-        <nav className="flex-1 px-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1 px-4 space-y-2 overflow-y-auto mt-4">
           {navItems.map((item) => (
             <SidebarItem 
               key={item.to} 
@@ -73,6 +89,13 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         </nav>
 
         <div className="p-4 border-t border-slate-200 dark:border-slate-700 space-y-2">
+           <button 
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+          >
+            <LogOut size={18} />
+            <span>Logout</span>
+          </button>
           <button 
             onClick={toggleTheme}
             className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"

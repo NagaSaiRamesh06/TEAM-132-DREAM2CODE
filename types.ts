@@ -1,3 +1,9 @@
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export interface UserProfile {
   name: string;
   email: string;
@@ -34,6 +40,7 @@ export interface Job {
   description: string;
   matchScore?: number;
   skillsRequired: string[];
+  applyLink?: string;
 }
 
 export interface ChatMessage {
